@@ -66,6 +66,9 @@ export const categoriesService = {
         .single();
 
       if (error) {
+        if (error.code !== 'PGRST116') {
+          console.warn('Supabase getCategoryById warning:', error.message);
+        }
         return null;
       }
       return data as Category;

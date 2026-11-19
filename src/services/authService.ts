@@ -37,6 +37,9 @@ export const authService = {
       const profile = profileData as AdminProfile | null;
 
       if (profileErr || !profile || profile.role !== 'admin') {
+        if (profileErr) {
+          console.error('Supabase error querying admin_profiles:', profileErr);
+        }
         await supabase.auth.signOut();
         throw new Error(
           "Accès refusé : Ce compte ne dispose pas des privilèges d'administrateur."
@@ -85,10 +88,14 @@ export const authService = {
         return null;
       }
 
-      const { data: profileData } = await (supabase.from('admin_profiles') as any)
+      const { data: profileData, error: profileErr } = await (supabase.from('admin_profiles') as any)
         .select('*')
         .eq('id', sessionData.session.user.id)
         .single();
+
+      if (profileErr) {
+        console.warn('Supabase getCurrentProfile error:', profileErr.message);
+      }
 
       const profile = profileData as AdminProfile | null;
 

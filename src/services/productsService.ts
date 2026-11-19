@@ -284,7 +284,35 @@ export const productsService = {
    * Récupère un produit par son identifiant
    */
   async getProductById(id: string): Promise<Product | null> {
-    const all = await this.getAllProductsAdmin();
+    if (isSupabaseConfigured && supabase) {
+      const { data, error } = await (supabase.from('products') as any)
+        .select(`
+          *,
+          category:categories(*),
+          images:product_images(*)
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        if (error.code !== 'PGRST116') {
+          console.warn('Supabase getProductById warning:', error.message);
+        }
+        return null;
+      }
+
+      return {
+        ...data,
+        images: (data.images || []).map((img: any) => ({
+          ...img,
+          url: img.storage_path.startsWith('http')
+            ? img.storage_path
+            : supabase!.storage.from(STORAGE_BUCKET_NAME).getPublicUrl(img.storage_path).data.publicUrl,
+        })),
+      } as Product;
+    }
+
+    const all = getLocalProducts();
     return all.find((p) => p.id === id) || null;
   },
 
@@ -326,7 +354,11 @@ export const productsService = {
           is_primary: img.is_primary,
         }));
 
-        await (supabase.from('product_images') as any).insert(imageInserts);
+        const { error: imageErr } = await (supabase.from('product_images') as any).insert(imageInserts);
+        if (imageErr) {
+          console.error('Supabase error saving product images:', imageErr);
+          throw new Error(`Échec de l'enregistrement des photos: ${imageErr.message}`);
+        }
       }
 
       return (await this.getProductById(productRow.id))!;
@@ -405,9 +437,14 @@ export const productsService = {
 
       if (images) {
         // Remplacer les images
-        await (supabase.from('product_images') as any).delete().eq('product_id', id);
+        const { error: delErr } = await (supabase.from('product_images') as any).delete().eq('product_id', id);
+        if (delErr) {
+          console.error('Supabase error deleting old images:', delErr);
+          throw new Error(`Erreur lors du remplacement des images: ${delErr.message}`);
+        }
+
         if (images.length > 0) {
-          await (supabase.from('product_images') as any).insert(
+          const { error: insErr } = await (supabase.from('product_images') as any).insert(
             images.map((img, idx) => ({
               product_id: id,
               storage_path: img.storage_path,
@@ -416,6 +453,10 @@ export const productsService = {
               is_primary: img.is_primary,
             }))
           );
+          if (insErr) {
+            console.error('Supabase error saving updated images:', insErr);
+            throw new Error(`Erreur lors de l'enregistrement des nouvelles images: ${insErr.message}`);
+          }
         }
       }
 

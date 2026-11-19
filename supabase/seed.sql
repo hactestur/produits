@@ -119,3 +119,23 @@ VALUES
   ('i1000000-0000-0000-0000-000000000007', 'p1000000-0000-0000-0000-000000000007', 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80', 'Bouteille huile d’olive', 0, true),
   ('i1000000-0000-0000-0000-000000000008', 'p1000000-0000-0000-0000-000000000008', 'https://images.unsplash.com/photo-1588252303782-cb80119abd6d?auto=format&fit=crop&w=800&q=80', 'Piments forts séchés', 0, true)
 ON CONFLICT (id) DO NOTHING;
+
+-- ==============================================================================
+-- 4. PROFIL ADMINISTRATEUR INITIAL (PROCÉDURE SÉCURISÉE)
+-- ==============================================================================
+-- Le rôle administrateur est strictement réservé aux utilisateurs enregistrés
+-- dans la table public.admin_profiles et liés à un compte valide dans auth.users.
+--
+-- Pour initialiser votre premier compte administrateur :
+-- 1. Créez un compte dans l'onglet Authentication de votre projet Supabase (ex: admin@saveursdor.ci).
+-- 2. Copiez l'UUID de l'utilisateur généré par Supabase Auth.
+-- 3. Exécutez la commande suivante dans l'éditeur SQL de Supabase :
+--
+-- INSERT INTO public.admin_profiles (id, email, role, full_name)
+-- VALUES (
+--   '00000000-0000-0000-0000-000000000000', -- Remplacer par l'UUID réel auth.users
+--   'admin@saveursdor.ci',
+--   'admin',
+--   'Administrateur Saveurs d’Or'
+-- ) ON CONFLICT (id) DO UPDATE SET role = 'admin';
+
