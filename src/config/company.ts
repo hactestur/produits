@@ -4,14 +4,14 @@
  * selon les coordonnées réelles de l'entreprise cliente.
  */
 export const COMPANY_CONFIG = {
-  name: "Saveurs d'Or Distribution",
+  name: "AMIGO",
   tagline: "Grossiste & Demi-gros en Produits Alimentaires",
   description: "Catalogue officiel de nos denrées alimentaires de première qualité : céréales, huiles, conserves, farines et boissons. Tarifs et disponibilités actualisés.",
   currency: "FCFA",
-  phone: "+225 07 12 34 56 78",
-  whatsapp: "+225 05 98 76 54 32",
-  email: "contact@saveursdor-ci.com",
-  address: "Boulevard de Marseille, Zone 4, Abidjan, Côte d'Ivoire",
+  phone: "+237 693 54 46 73",
+  whatsapp: "+237 699 34 23 12",
+  email: "contact@amigo.com",
+  address: "marche makepe missoke, douala, Cameroun",
   openingHours: "Lundi au Samedi : 07h30 – 18h30",
   // Mention légale / Note informative
   catalogNotice: "Ce catalogue est informatif. Pour toute commande ou réservation de gros volumes, veuillez contacter directement notre équipe commerciale.",
