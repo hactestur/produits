@@ -108,6 +108,14 @@ export default {
         serif: ['"Playfair Display"', 'Georgia', 'serif'],
         display: ['"Playfair Display"', 'Georgia', 'serif'],
       },
+      aspectRatio: {
+        auto: 'auto',
+        square: '1 / 1',
+        video: '16 / 9',
+        '4/3': '4 / 3',
+        '1/1': '1 / 1',
+        '16/9': '16 / 9',
+      },
       boxShadow: {
         'warm-xs': '0 1px 2px 0 rgba(23, 17, 14, 0.04)',
         'warm-sm': '0 2px 6px -1px rgba(23, 17, 14, 0.06), 0 1px 3px 0 rgba(23, 17, 14, 0.04)',

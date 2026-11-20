@@ -234,17 +234,18 @@ export const HomePage: React.FC = () => {
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-80 bg-cream-200/60 rounded-2xl" />
+                <div key={i} className="aspect-[4/5] bg-cream-200/60 rounded-2xl" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch">
               {featuredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onSelect={handleOpenDetail}
-                />
+                <div key={product.id} className="h-full flex">
+                  <ProductCard
+                    product={product}
+                    onSelect={handleOpenDetail}
+                  />
+                </div>
               ))}
             </div>
           )}

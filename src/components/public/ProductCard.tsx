@@ -31,36 +31,36 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
   return (
     <article
       onClick={() => onSelect(product)}
-      className="group relative bg-white rounded-2xl border border-cream-200 hover:border-gold-500/70 shadow-warm-xs hover:shadow-warm-lg transition-all duration-300 overflow-hidden flex flex-col cursor-pointer active:scale-[0.995] focus-within:ring-2 focus-within:ring-forest-700"
+      className="group relative bg-white rounded-2xl border border-cream-200 hover:border-gold-500/70 shadow-warm-xs hover:shadow-warm-lg transition-all duration-300 overflow-hidden flex flex-col h-full w-full cursor-pointer active:scale-[0.995] focus-within:ring-2 focus-within:ring-forest-700 select-none"
     >
-      {/* Zone Image */}
-      <div className="relative aspect-4/3 w-full bg-cream-100/50 overflow-hidden">
+      {/* Zone Image : Ratio 4/3 strict et immuable */}
+      <div className="relative w-full aspect-[4/3] bg-cream-100/60 overflow-hidden shrink-0">
         {primaryImage && !imageError ? (
           <img
             src={primaryImage.url}
             alt={primaryImage.alt_text || product.name}
             loading="lazy"
             onError={() => setImageError(true)}
-            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 ${
               isOutOfStock ? 'opacity-70 grayscale-25' : ''
             }`}
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-earth-400 bg-cream-50">
+          <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-earth-400 bg-cream-50">
             <ImageOff className="w-10 h-10 mb-2 stroke-[1.5]" aria-hidden="true" />
             <span className="text-xs font-medium">Photo Saveurs d'Or</span>
           </div>
         )}
 
         {/* Badge disponibilité en superposition sur l'image */}
-        <div className="absolute top-3 left-3 z-10">
+        <div className="absolute top-3 left-3 z-10 pointer-events-none">
           <AvailabilityBadge availability={product.availability} size="sm" />
         </div>
 
         {/* Catégorie en haut à droite */}
         {product.category && (
-          <div className="absolute top-3 right-3 z-10">
-            <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-forest-950/85 text-gold-300 border border-forest-800/80 backdrop-blur-xs shadow-warm-xs">
+          <div className="absolute top-3 right-3 z-10 pointer-events-none">
+            <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-forest-950/85 text-gold-300 border border-forest-800/80 backdrop-blur-xs shadow-warm-xs max-w-[140px] truncate block">
               {product.category.name}
             </span>
           </div>
@@ -68,47 +68,57 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
 
         {/* Conditionnement en bandeau bas d'image */}
         {product.packaging && (
-          <div className="absolute bottom-2.5 left-2.5 z-10">
-            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-white/95 text-earth-800 shadow-warm-xs border border-cream-300 backdrop-blur-xs">
+          <div className="absolute bottom-2.5 left-2.5 z-10 pointer-events-none">
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-white/95 text-earth-800 shadow-warm-xs border border-cream-300 backdrop-blur-xs max-w-[160px] truncate block">
               {product.packaging}
             </span>
           </div>
         )}
       </div>
 
-      {/* Zone Informations Produit */}
+      {/* Zone Informations Produit : Structure verticale rigoureuse */}
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
-        <div>
-          {/* Référence SKU si existante */}
-          {product.sku && (
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-earth-400 block mb-1">
-              Réf : {product.sku}
-            </span>
-          )}
+        <div className="space-y-1">
+          {/* Référence SKU : slot d'alignement avec hauteur fixe */}
+          <div className="h-4 flex items-center">
+            {product.sku ? (
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-earth-400 truncate block">
+                Réf : {product.sku}
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-transparent block select-none">
+                Réf : SO
+              </span>
+            )}
+          </div>
 
-          {/* Nom du produit */}
-          <h3 className="text-base sm:text-lg font-bold text-forest-950 group-hover:text-forest-700 transition-colors leading-snug line-clamp-2">
+          {/* Nom du produit : 2 lignes strictement calibrées */}
+          <h3
+            className="text-base sm:text-lg font-bold text-forest-950 group-hover:text-forest-700 transition-colors leading-snug line-clamp-2 h-12 sm:h-14 flex items-start"
+            title={product.name}
+          >
             {product.name}
           </h3>
 
-          {/* Courte description */}
-          {product.short_description && (
-            <p className="mt-1.5 text-xs sm:text-sm text-earth-600 line-clamp-2 leading-relaxed">
-              {product.short_description}
-            </p>
-          )}
+          {/* Courte description : 2 lignes strictement calibrées */}
+          <p
+            className="text-xs sm:text-sm text-earth-600 line-clamp-2 leading-relaxed h-9 sm:h-10 overflow-hidden"
+            title={product.short_description || undefined}
+          >
+            {product.short_description || "Denrée alimentaire sélectionnée par Saveurs d'Or. Qualité et traçabilité garanties."}
+          </p>
         </div>
 
-        {/* Prix et Boutons d'action */}
-        <div className="mt-4 pt-3.5 border-t border-cream-100 flex items-center justify-between gap-3">
-          <div>
+        {/* Prix et Boutons d'action : ancrés au même niveau sur chaque ligne */}
+        <div className="mt-4 pt-3.5 border-t border-cream-100 flex items-center justify-between gap-2 shrink-0">
+          <div className="min-w-0 flex-1">
             <span className="text-[10px] text-earth-500 font-bold uppercase tracking-wider block">Prix unitaire</span>
-            <span className="text-lg sm:text-xl font-black text-forest-900 font-serif tracking-tight">
+            <span className="text-lg sm:text-xl font-black text-forest-900 font-serif tracking-tight truncate block">
               {formatFCFA(product.price)}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Bouton Consulter détails */}
             <button
               type="button"

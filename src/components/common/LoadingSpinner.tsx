@@ -17,15 +17,17 @@ export const LoadingSpinner: React.FC<{ label?: string }> = ({
 
 export const SkeletonProductCard: React.FC = () => {
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-xs animate-pulse">
-      <div className="aspect-4/3 bg-stone-200 w-full" />
-      <div className="p-4 sm:p-5 space-y-3">
-        <div className="h-4 bg-stone-200 rounded-md w-1/3" />
-        <div className="h-6 bg-stone-200 rounded-md w-3/4" />
-        <div className="h-4 bg-stone-200 rounded-md w-full" />
-        <div className="pt-2 flex items-center justify-between">
-          <div className="h-7 bg-stone-200 rounded-md w-2/5" />
-          <div className="h-7 bg-stone-200 rounded-full w-1/4" />
+    <div className="bg-white rounded-2xl border border-cream-200 overflow-hidden shadow-warm-xs animate-pulse h-full flex flex-col justify-between">
+      <div className="aspect-[4/3] bg-cream-200/70 w-full shrink-0" />
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+        <div className="space-y-2">
+          <div className="h-3.5 bg-cream-200 rounded-md w-1/4" />
+          <div className="h-5 bg-cream-200 rounded-md w-3/4" />
+          <div className="h-4 bg-cream-200 rounded-md w-full" />
+        </div>
+        <div className="pt-3.5 border-t border-cream-100 flex items-center justify-between">
+          <div className="h-6 bg-cream-200 rounded-md w-1/3" />
+          <div className="h-9 bg-cream-200 rounded-xl w-1/3" />
         </div>
       </div>
     </div>

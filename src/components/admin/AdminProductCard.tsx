@@ -25,26 +25,26 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
 
   return (
     <div
-      className={`bg-white rounded-2xl border p-4 sm:p-5 shadow-xs transition-all flex flex-col justify-between gap-4 ${
-        !isPublished ? 'border-dashed border-stone-300 bg-stone-50/70' : 'border-stone-200'
+      className={`bg-white rounded-2xl border p-4 sm:p-5 shadow-warm-xs transition-all flex flex-col justify-between h-full gap-4 ${
+        !isPublished ? 'border-dashed border-stone-300 bg-stone-50/70' : 'border-cream-200'
       }`}
     >
       <div className="flex items-start gap-4">
-        {/* Photo Miniature */}
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-stone-100 overflow-hidden shrink-0 border border-stone-200">
+        {/* Photo Miniature : format carré rigide */}
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-cream-100 overflow-hidden shrink-0 border border-cream-200">
           {primaryImage ? (
             <img
               src={primaryImage.url}
               alt={product.name}
-              className={`w-full h-full object-cover ${!isPublished ? 'grayscale-40 opacity-80' : ''}`}
+              className={`absolute inset-0 w-full h-full object-cover object-center ${!isPublished ? 'grayscale-40 opacity-80' : ''}`}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-stone-400">
+            <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-earth-400">
               <ImageOff className="w-6 h-6 stroke-[1.5]" />
             </div>
           )}
           {product.images.length > 1 && (
-            <span className="absolute bottom-1 right-1 bg-stone-900/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
+            <span className="absolute bottom-1 right-1 bg-forest-950/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm z-10">
               +{product.images.length - 1}
             </span>
           )}
@@ -56,24 +56,24 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
             <VisibilityBadge visibility={product.visibility} size="sm" />
             <AvailabilityBadge availability={product.availability} size="sm" />
             {product.category && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-cream-100 text-earth-800 border border-cream-200">
                 {product.category.name}
               </span>
             )}
           </div>
 
-          <h3 className="text-base sm:text-lg font-bold text-stone-900 leading-snug">
+          <h3 className="text-base sm:text-lg font-bold text-forest-950 leading-snug line-clamp-2">
             {product.name}
           </h3>
 
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-lg font-extrabold text-brand-800">
+            <span className="text-lg font-serif font-black text-forest-900">
               {formatFCFA(product.price)}
             </span>
           </div>
 
           {product.short_description && (
-            <p className="mt-1 text-xs text-stone-500 line-clamp-1">
+            <p className="mt-1 text-xs text-earth-600 line-clamp-1">
               {product.short_description}
             </p>
           )}

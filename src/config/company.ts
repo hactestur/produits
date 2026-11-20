@@ -5,10 +5,10 @@
  * commerciaux pour la distribution alimentaire au Cameroun.
  */
 export const COMPANY_CONFIG = {
-  brandName: "Saveurs d'Or",
+  brandName: "Chez  AMIGO",
   parentCompany: "AMIGO",
   legalName: "AMIGO Distribution Alimentaire S.A.",
-  fullName: "Saveurs d'Or by AMIGO",
+  fullName: "AMIGO",
   tagline: "Épicerie Fine & Distribution Alimentaire à Douala",
   subTagline: "Grossiste & Demi-gros en Produits d'Épicerie Sélectionnés",
   description: "Sélection de produits d'épicerie fine, grossiste et demi-gros en denrées de qualité supérieure à Douala : riz parfumé, huiles végétales pures, conserves, farines panifiables, sucres et boissons. Tarifs officiels en FCFA et disponibilités actualisés.",
@@ -17,10 +17,10 @@ export const COMPANY_CONFIG = {
   // Coordonnées officielles
   phone: "+237 693 54 46 73",
   phoneRaw: "+237693544673",
-  whatsapp: "+237 699 34 23 12",
-  whatsappRaw: "237699342312",
-  email: "contact@amigo.cm",
-  adminDemoEmail: "admin@amigo.cm",
+  whatsapp: "+237 678830280",
+  whatsappRaw: "237678830280",
+  email: "contact@amigo.com",
+  adminDemoEmail: "admin@amigo.com",
   
   // Localisation
   city: "Douala",

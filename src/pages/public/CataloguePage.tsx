@@ -295,13 +295,14 @@ export const CataloguePage: React.FC = () => {
           {isLoading ? (
             <SkeletonGrid count={6} />
           ) : products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch">
               {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onSelect={handleOpenDetail}
-                />
+                <div key={product.id} className="h-full flex">
+                  <ProductCard
+                    product={product}
+                    onSelect={handleOpenDetail}
+                  />
+                </div>
               ))}
             </div>
           ) : (

@@ -66,3 +66,9 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Aspect ratio 4/3 fallback strict pour les cards produits */
+.aspect-4\/3,
+.aspect-4-3 {
+  aspect-ratio: 4 / 3;
+}
