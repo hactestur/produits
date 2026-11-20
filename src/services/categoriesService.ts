@@ -1,7 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../config/supabase';
 import type { Category, CreateCategoryInput, UpdateCategoryInput } from '../types/category';
 import { INITIAL_CATEGORIES } from './mockData';
-import { slugify } from '../utils/formatters';
+import { slugify, sanitizeCategoryName } from '../utils/formatters';
 
 const LOCAL_STORAGE_KEY = 'saveursdor_categories_v1';
 
@@ -45,14 +45,21 @@ export const categoriesService = {
         console.error('Supabase error fetching categories:', error);
         throw new Error(`Erreur lors du chargement des catégories: ${error.message}`);
       }
-      return (data || []) as Category[];
+      return ((data || []) as Category[]).map((c) => ({
+        ...c,
+        name: sanitizeCategoryName(c.name),
+      }));
     }
 
     // Mode Local / Démo
     const local = getLocalCategories();
     return local
       .filter((c) => (includeInactive ? true : c.is_active))
-      .sort((a, b) => a.display_order - b.display_order);
+      .sort((a, b) => a.display_order - b.display_order)
+      .map((c) => ({
+        ...c,
+        name: sanitizeCategoryName(c.name),
+      }));
   },
 
   /**
@@ -71,11 +78,19 @@ export const categoriesService = {
         }
         return null;
       }
-      return data as Category;
+      return {
+        ...(data as Category),
+        name: sanitizeCategoryName((data as Category).name),
+      };
     }
 
     const local = getLocalCategories();
-    return local.find((c) => c.id === id) || null;
+    const found = local.find((c) => c.id === id);
+    if (!found) return null;
+    return {
+      ...found,
+      name: sanitizeCategoryName(found.name),
+    };
   },
 
   /**

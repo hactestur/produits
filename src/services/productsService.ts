@@ -11,7 +11,7 @@ import type {
 } from '../types/product';
 import { INITIAL_PRODUCTS } from './mockData';
 import { categoriesService } from './categoriesService';
-import { slugify, cleanSearchTerm } from '../utils/formatters';
+import { slugify, cleanSearchTerm, inferPackaging, generateProductSku } from '../utils/formatters';
 
 const LOCAL_STORAGE_PRODUCTS_KEY = 'saveursdor_products_v1';
 
@@ -88,6 +88,8 @@ export const productsService = {
 
       let results: Product[] = ((data || []) as any[]).map((row) => ({
         ...row,
+        packaging: row.packaging || inferPackaging(row.name),
+        sku: row.sku || generateProductSku(row.name, row.id),
         images: (row.images || []).map((img: any) => ({
           ...img,
           url: img.storage_path.startsWith('http')
@@ -99,14 +101,16 @@ export const productsService = {
       // Filtrer pour ne garder que les catégories actives
       results = results.filter((p) => activeCategoryIds.has(p.category_id));
 
-      // Recherche textuelle côté client
+      // Recherche textuelle côté client (Nom, SKU, Conditionnement, Description)
       if (filters?.search) {
         const cleanQuery = cleanSearchTerm(filters.search).toLowerCase();
         results = results.filter(
           (p) =>
             p.name.toLowerCase().includes(cleanQuery) ||
             (p.short_description && p.short_description.toLowerCase().includes(cleanQuery)) ||
-            (p.description && p.description.toLowerCase().includes(cleanQuery))
+            (p.description && p.description.toLowerCase().includes(cleanQuery)) ||
+            (p.sku && p.sku.toLowerCase().includes(cleanQuery)) ||
+            (p.packaging && p.packaging.toLowerCase().includes(cleanQuery))
         );
       }
 
@@ -119,9 +123,11 @@ export const productsService = {
     // Ne retenir que les catégories actives
     products = products.filter((p) => activeCategoryIds.has(p.category_id));
 
-    // Enrichir avec la catégorie correspondante
+    // Enrichir avec la catégorie correspondante et les métadonnées commerciales
     products = products.map((p) => ({
       ...p,
+      packaging: p.packaging || inferPackaging(p.name),
+      sku: p.sku || generateProductSku(p.name, p.id),
       category: activeCategories.find((c) => c.id === p.category_id),
     }));
 
@@ -145,14 +151,16 @@ export const productsService = {
       products = products.filter((p) => p.price <= filters.maxPrice!);
     }
 
-    // Recherche
+    // Recherche (Nom, SKU, Conditionnement, Description)
     if (filters?.search) {
       const cleanQuery = cleanSearchTerm(filters.search).toLowerCase();
       products = products.filter(
         (p) =>
           p.name.toLowerCase().includes(cleanQuery) ||
           (p.short_description && p.short_description.toLowerCase().includes(cleanQuery)) ||
-          (p.description && p.description.toLowerCase().includes(cleanQuery))
+          (p.description && p.description.toLowerCase().includes(cleanQuery)) ||
+          (p.sku && p.sku.toLowerCase().includes(cleanQuery)) ||
+          (p.packaging && p.packaging.toLowerCase().includes(cleanQuery))
       );
     }
 
@@ -208,6 +216,8 @@ export const productsService = {
 
       let results: Product[] = ((data || []) as any[]).map((row) => ({
         ...row,
+        packaging: row.packaging || inferPackaging(row.name),
+        sku: row.sku || generateProductSku(row.name, row.id),
         images: (row.images || []).map((img: any) => ({
           ...img,
           url: img.storage_path.startsWith('http')
@@ -231,6 +241,8 @@ export const productsService = {
     // Mode Local
     let products = getLocalProducts().map((p) => ({
       ...p,
+      packaging: p.packaging || inferPackaging(p.name),
+      sku: p.sku || generateProductSku(p.name, p.id),
       category: allCategories.find((c) => c.id === p.category_id),
     }));
 
@@ -303,6 +315,8 @@ export const productsService = {
 
       return {
         ...data,
+        packaging: data.packaging || inferPackaging(data.name),
+        sku: data.sku || generateProductSku(data.name, data.id),
         images: (data.images || []).map((img: any) => ({
           ...img,
           url: img.storage_path.startsWith('http')
@@ -313,7 +327,13 @@ export const productsService = {
     }
 
     const all = getLocalProducts();
-    return all.find((p) => p.id === id) || null;
+    const found = all.find((p) => p.id === id);
+    if (!found) return null;
+    return {
+      ...found,
+      packaging: found.packaging || inferPackaging(found.name),
+      sku: found.sku || generateProductSku(found.name, found.id),
+    };
   },
 
   /**

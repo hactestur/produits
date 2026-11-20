@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { Product } from '../../types/product';
 import type { Category } from '../../types/category';
 import { productsService } from '../../services/productsService';
@@ -14,23 +15,40 @@ import type { FilterState } from '../../components/public/FilterDrawer';
 import { ProductCard } from '../../components/public/ProductCard';
 import { ProductDetailModal } from '../../components/public/ProductDetailModal';
 import { SkeletonGrid } from '../../components/common/LoadingSpinner';
-import { Filter, RotateCcw, AlertCircle, ShoppingBag, Sparkles } from 'lucide-react';
+import { CartDrawer } from '../../components/cart/CartDrawer';
+import { OrderRequestModal } from '../../components/cart/OrderRequestModal';
+import { ToastNotification } from '../../components/common/ToastNotification';
+import { COMPANY_CONFIG } from '../../config/company';
+import {
+  Filter,
+  RotateCcw,
+  AlertCircle,
+  ShoppingBag,
+  Sparkles,
+  MessageSquare,
+  HelpCircle,
+} from 'lucide-react';
 import { Button } from '../../components/common/Button';
 
 export const CataloguePage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialCategory = searchParams.get('category') || 'all';
+
   const [products, setProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // Filtres
   const [search, setSearch] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false);
 
   const [advancedFilters, setAdvancedFilters] = useState<FilterState>({
-    categoryId: 'all',
+    categoryId: initialCategory,
     availability: 'all',
     minPrice: undefined,
     maxPrice: undefined,
@@ -40,27 +58,58 @@ export const CataloguePage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
 
-  // Chargement des données
+  // Synchronisation avec l'URL param si présent
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat && cat !== selectedCategory) {
+      setSelectedCategory(cat);
+      setAdvancedFilters((prev) => ({ ...prev, categoryId: cat }));
+    }
+  }, [searchParams, selectedCategory]);
+
+  // Chargement initial des catégories et de tous les produits pour les compteurs
+  useEffect(() => {
+    async function loadInitialData() {
+      try {
+        const [cats, allProds] = await Promise.all([
+          categoriesService.getCategories(false),
+          productsService.getPublicProducts(),
+        ]);
+        setCategories(cats);
+        setAllProducts(allProds);
+
+        // Calcul des compteurs réels par catégorie
+        const counts: Record<string, number> = {};
+        allProds.forEach((p) => {
+          counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+        });
+        setCategoryCounts(counts);
+      } catch (err) {
+        console.error('Erreur initialisation catalogue:', err);
+      }
+    }
+    loadInitialData();
+  }, []);
+
+  // Chargement des données filtrées
   const loadData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const [cats, prods] = await Promise.all([
-        categoriesService.getCategories(false), // Catégories actives uniquement
-        productsService.getPublicProducts({
-          search,
-          categoryId: selectedCategory !== 'all' ? selectedCategory : advancedFilters.categoryId,
-          availability: advancedFilters.availability,
-          minPrice: advancedFilters.minPrice,
-          maxPrice: advancedFilters.maxPrice,
-          sortBy,
-        }),
-      ]);
-      setCategories(cats);
+      const prods = await productsService.getPublicProducts({
+        search,
+        categoryId: selectedCategory !== 'all' ? selectedCategory : advancedFilters.categoryId,
+        availability: advancedFilters.availability,
+        minPrice: advancedFilters.minPrice,
+        maxPrice: advancedFilters.maxPrice,
+        sortBy,
+      });
       setProducts(prods);
     } catch (err: unknown) {
       console.error('Erreur chargement catalogue:', err);
-      setError('Impossible de charger le catalogue de produits pour le moment. Veuillez vérifier votre connexion.');
+      setError(
+        'Impossible de charger le catalogue de produits pour le moment. Veuillez vérifier votre connexion.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -84,12 +133,24 @@ export const CataloguePage: React.FC = () => {
   const handleSelectCategory = (catId: string) => {
     setSelectedCategory(catId);
     setAdvancedFilters((prev) => ({ ...prev, categoryId: catId }));
+    if (catId === 'all') {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', catId);
+    }
+    setSearchParams(searchParams);
   };
 
   // Appliquer les filtres du tiroir
   const handleApplyDrawerFilters = (newFilters: FilterState) => {
     setAdvancedFilters(newFilters);
     setSelectedCategory(newFilters.categoryId);
+    if (newFilters.categoryId === 'all') {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', newFilters.categoryId);
+    }
+    setSearchParams(searchParams);
   };
 
   // Réinitialiser tous les filtres
@@ -103,6 +164,7 @@ export const CataloguePage: React.FC = () => {
       minPrice: undefined,
       maxPrice: undefined,
     });
+    setSearchParams({});
   };
 
   // Ouvrir la fiche détaillée
@@ -118,16 +180,35 @@ export const CataloguePage: React.FC = () => {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8">
         {/* Titre & Section d'accueil */}
         <section className="text-center sm:text-left space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100/80 text-brand-900 text-xs sm:text-sm font-semibold mb-1">
-            <Sparkles className="w-4 h-4 text-brand-700" aria-hidden="true" />
-            <span>Catalogue Alimentaire Officiel</span>
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-cream-100 text-forest-900 border border-cream-300 text-xs sm:text-sm font-bold mb-1 shadow-warm-xs">
+            <Sparkles className="w-4 h-4 text-gold-500" aria-hidden="true" />
+            <span>Catalogue Officiel {COMPANY_CONFIG.brandName} par {COMPANY_CONFIG.parentCompany} • Douala</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 tracking-tight">
-            Découvrez nos produits alimentaires
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-black text-forest-950 tracking-tight">
+            Catalogue & Rayons Alimentaires
           </h1>
-          <p className="text-base sm:text-lg text-stone-600 max-w-3xl leading-relaxed">
-            Consultez nos arrivages réguliers en céréales, huiles, farines, conserves et boissons. Tarifs en Francs CFA (FCFA) et disponibilités actualisés.
+          <p className="text-base sm:text-lg text-earth-700 max-w-3xl leading-relaxed">
+            Consultez nos arrivages réguliers en riz parfumé, huiles végétales pures, conserves, farines, sucres et boissons. Tarifs directs grossiste en Francs CFA (FCFA) et stocks actualisés.
           </p>
+        </section>
+
+        {/* Note commerciale sans paiement */}
+        <section className="p-4 rounded-2xl bg-cream-100/90 border border-cream-300 text-earth-950 text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-warm-xs">
+          <div className="flex items-center gap-2.5">
+            <HelpCircle className="w-5 h-5 text-forest-700 shrink-0" />
+            <span className="leading-snug">
+              <strong>Demandes de commande indicatives</strong> : Constituez votre panier sans paiement en ligne. Notre équipe commerciale valide la disponibilité et planifie le règlement et la livraison directement sur WhatsApp.
+            </span>
+          </div>
+          <a
+            href={`https://wa.me/${COMPANY_CONFIG.whatsappRaw}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shrink-0 transition-colors shadow-warm-xs"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Échanger sur WhatsApp</span>
+          </a>
         </section>
 
         {/* Barre de Recherche principale */}
@@ -135,31 +216,32 @@ export const CataloguePage: React.FC = () => {
           <SearchBar value={search} onChange={setSearch} />
         </section>
 
-        {/* Barre des Catégories rapides */}
+        {/* Barre des Catégories rapides avec compteurs réels */}
         <section aria-label="Familles de produits">
           <CategoryBar
             categories={categories}
             selectedCategoryId={selectedCategory}
             onSelectCategory={handleSelectCategory}
-            totalProductsCount={products.length}
+            totalProductsCount={allProducts.length}
+            categoryCounts={categoryCounts}
           />
         </section>
 
         {/* Barre de Filtres et Tri */}
-        <section className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-2 border-t border-stone-200">
+        <section className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-2 border-t border-cream-200">
           <div className="flex items-center gap-3">
             <Button
               type="button"
               variant="outline"
               size="md"
               onClick={() => setIsFilterDrawerOpen(true)}
-              icon={<Filter className="w-4 h-4" />}
-              className="relative shadow-xs"
+              icon={<Filter className="w-4 h-4 text-forest-700" />}
+              className="relative shadow-warm-xs"
               aria-label="Ouvrir le panneau des filtres"
             >
-              <span>Filtrer les produits</span>
+              <span>Filtrer les rayons</span>
               {activeFiltersCount > 0 && (
-                <span className="ml-2 px-2 py-0.5 text-xs font-extrabold bg-brand-700 text-white rounded-full">
+                <span className="ml-2 px-2 py-0.5 text-xs font-black bg-forest-800 text-gold-300 rounded-full border border-forest-950">
                   {activeFiltersCount}
                 </span>
               )}
@@ -169,7 +251,7 @@ export const CataloguePage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleResetAllFilters}
-                className="inline-flex items-center gap-1 text-sm text-stone-600 hover:text-brand-800 font-medium px-2 py-2 min-h-[44px] transition-colors"
+                className="inline-flex items-center gap-1 text-sm text-earth-600 hover:text-forest-900 font-semibold px-2 py-2 min-h-[44px] transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Effacer les filtres</span>
@@ -178,7 +260,7 @@ export const CataloguePage: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-between sm:justify-end gap-3">
-            <span className="text-sm font-semibold text-stone-600">
+            <span className="text-sm font-bold text-earth-700">
               {products.length} produit{products.length > 1 ? 's' : ''} trouvé{products.length > 1 ? 's' : ''}
             </span>
             <SortSelect value={sortBy} onChange={setSortBy} />
@@ -224,15 +306,15 @@ export const CataloguePage: React.FC = () => {
             </div>
           ) : (
             /* État vide */
-            <div className="py-16 px-4 text-center bg-white rounded-3xl border border-stone-200 shadow-xs max-w-xl mx-auto my-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-brand-50 rounded-2xl flex items-center justify-center text-brand-700">
-                <ShoppingBag className="w-8 h-8" aria-hidden="true" />
+            <div className="py-16 px-4 text-center bg-white rounded-3xl border border-cream-200 shadow-warm-xs max-w-xl mx-auto my-6">
+              <div className="w-16 h-16 mx-auto mb-4 bg-cream-100 rounded-2xl flex items-center justify-center text-forest-800 border border-cream-200">
+                <ShoppingBag className="w-8 h-8 stroke-[1.5]" aria-hidden="true" />
               </div>
-              <h2 className="text-xl font-bold text-stone-900 mb-2">
-                Aucun produit ne correspond à votre recherche
+              <h2 className="text-xl font-serif font-black text-forest-950 mb-2">
+                Aucun produit ne correspond à votre sélection
               </h2>
-              <p className="text-sm text-stone-600 leading-relaxed mb-6">
-                Essayez d'ajuster vos mots-clés, de sélectionner une autre famille de produits ou de réinitialiser vos filtres.
+              <p className="text-sm text-earth-600 leading-relaxed mb-6">
+                Essayez d'ajuster vos mots-clés, de sélectionner un autre rayon ou de réinitialiser vos filtres.
               </p>
               <Button
                 type="button"
@@ -258,12 +340,19 @@ export const CataloguePage: React.FC = () => {
         totalFilteredCount={products.length}
       />
 
-      {/* Fiche Détaillée d'un Produit */}
+      {/* Fiche Détaillée d'un Produit avec Produits Similaires */}
       <ProductDetailModal
         product={selectedProduct}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
+        allProducts={allProducts}
+        onSelectProduct={(p) => setSelectedProduct(p)}
       />
+
+      {/* Tiroir Panier & Modale de Commande */}
+      <CartDrawer />
+      <OrderRequestModal />
+      <ToastNotification />
 
       <Footer />
     </div>

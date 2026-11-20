@@ -1,7 +1,9 @@
 import { supabase, isSupabaseConfigured } from '../config/supabase';
+import { COMPANY_CONFIG } from '../config/company';
 import type { AdminProfile } from '../types/auth';
 
-const LOCAL_ADMIN_KEY = 'saveursdor_admin_session';
+const LOCAL_ADMIN_KEY = 'amigo_admin_session';
+const LEGACY_ADMIN_KEY = 'saveursdor_admin_session';
 
 export const authService = {
   /**
@@ -50,13 +52,18 @@ export const authService = {
     }
 
     // Mode Local / Démo : permet de tester l'administration sans configuration Supabase immédiate
-    // Identifiants par défaut documentés pour les tests : admin@saveursdor.ci / admin123
-    if (cleanEmail === 'admin@saveursdor.ci' && password === 'admin123') {
+    // Identifiants par défaut documentés : admin@amigo.cm / admin123 (rétrocompatible avec admin@saveursdor.ci)
+    if (
+      (cleanEmail === COMPANY_CONFIG.adminDemoEmail ||
+        cleanEmail === 'admin@amigo.cm' ||
+        cleanEmail === 'admin@saveursdor.ci') &&
+      password === 'admin123'
+    ) {
       const demoAdmin: AdminProfile = {
         id: 'admin-demo-uuid',
-        email: 'admin@saveursdor.ci',
+        email: cleanEmail,
         role: 'admin',
-        full_name: 'Gestionnaire Démo',
+        full_name: 'Gestionnaire AMIGO',
         created_at: new Date().toISOString(),
       };
       localStorage.setItem(LOCAL_ADMIN_KEY, JSON.stringify(demoAdmin));
@@ -64,7 +71,7 @@ export const authService = {
     }
 
     throw new Error(
-      'Identifiants incorrects. En mode démo local, utilisez "admin@saveursdor.ci" et le mot de passe "admin123".'
+      `Identifiants incorrects. En mode démo local, utilisez "${COMPANY_CONFIG.adminDemoEmail}" et le mot de passe "admin123".`
     );
   },
 
@@ -76,6 +83,7 @@ export const authService = {
       await supabase.auth.signOut();
     }
     localStorage.removeItem(LOCAL_ADMIN_KEY);
+    localStorage.removeItem(LEGACY_ADMIN_KEY);
   },
 
   /**
@@ -107,7 +115,7 @@ export const authService = {
 
     // Mode Local
     try {
-      const stored = localStorage.getItem(LOCAL_ADMIN_KEY);
+      const stored = localStorage.getItem(LOCAL_ADMIN_KEY) || localStorage.getItem(LEGACY_ADMIN_KEY);
       if (stored) {
         return JSON.parse(stored);
       }

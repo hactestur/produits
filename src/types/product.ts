@@ -18,6 +18,10 @@ export interface Product {
   id: string;
   name: string;
   slug: string;
+  sku?: string | null;
+  brand?: string | null;
+  packaging?: string | null; // e.g. "Sac de 25 kg", "Carton de 20 paquets", "Bidon 5L"
+  unit?: string | null;      // e.g. "Sac", "Carton", "Bidon", "Bouteille", "Paquet"
   short_description?: string | null;
   description?: string | null;
   price: number; // Stored in FCFA as positive integer/numeric
@@ -56,6 +60,10 @@ export interface CreateProductInput {
   visibility?: ProductVisibility;
   short_description?: string;
   description?: string;
+  sku?: string;
+  brand?: string;
+  packaging?: string;
+  unit?: string;
 }
 
 export type UpdateProductInput = Partial<CreateProductInput>;

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;0,900;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,8 +7,8 @@
 @layer base {
   html {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    color: #1f2937;
-    background-color: #fcfbf9;
+    color: #271f1a;
+    background-color: #fbf9f5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
@@ -21,7 +21,7 @@
 
   /* Accessible focus indicators for keyboard navigation */
   :focus-visible {
-    outline: 3px solid #15803d;
+    outline: 3px solid #23563e;
     outline-offset: 2px;
   }
 
@@ -29,6 +29,33 @@
   html {
     -webkit-text-size-adjust: 100%;
   }
+
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Utilitaires typographiques et graphiques Saveurs d'Or */
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Gradient doré délicat pour badges et textes d'accent */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #deb851 0%, #cfa035 50%, #906220 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Arrière-plan festonné / texturé subtil */
+.bg-warm-pattern {
+  background-color: #fbf9f5;
+  background-image: radial-gradient(rgba(44, 107, 77, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* Custom scrollbar for horizontal categories */

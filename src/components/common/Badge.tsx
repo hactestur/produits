@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import type { ProductAvailability, ProductVisibility } from '../../types/product';
 
 interface AvailabilityBadgeProps {
@@ -16,24 +16,20 @@ export const AvailabilityBadge: React.FC<AvailabilityBadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full ${sizeClasses} ${
+      className={`inline-flex items-center gap-1.5 rounded-full font-semibold backdrop-blur-xs transition-colors shadow-warm-xs ${sizeClasses} ${
         isAvailable
-          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-          : 'bg-amber-50 text-amber-900 border border-amber-300'
+          ? 'bg-forest-50/95 text-forest-900 border border-forest-300/80'
+          : 'bg-amber-50/95 text-amber-950 border border-amber-300'
       }`}
       role="status"
     >
-      {isAvailable ? (
-        <>
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
-          <span>Disponible</span>
-        </>
-      ) : (
-        <>
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
-          <span>En rupture</span>
-        </>
-      )}
+      <span
+        className={`w-2 h-2 rounded-full shrink-0 ${
+          isAvailable ? 'bg-forest-600 animate-pulse' : 'bg-amber-600'
+        }`}
+        aria-hidden="true"
+      />
+      <span>{isAvailable ? 'En stock' : 'En rupture'}</span>
     </span>
   );
 };
@@ -52,21 +48,21 @@ export const VisibilityBadge: React.FC<VisibilityBadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full ${sizeClasses} ${
+      className={`inline-flex items-center gap-1.5 rounded-full font-medium ${sizeClasses} ${
         isPublished
-          ? 'bg-brand-50 text-brand-800 border border-brand-200'
-          : 'bg-stone-100 text-stone-700 border border-stone-300'
+          ? 'bg-sage-100 text-sage-900 border border-sage-300'
+          : 'bg-earth-100 text-earth-700 border border-earth-300'
       }`}
       role="status"
     >
       {isPublished ? (
         <>
-          <Eye className="w-4 h-4 text-brand-700 shrink-0" aria-hidden="true" />
+          <Eye className="w-4 h-4 text-forest-700 shrink-0" aria-hidden="true" />
           <span>Publié</span>
         </>
       ) : (
         <>
-          <EyeOff className="w-4 h-4 text-stone-500 shrink-0" aria-hidden="true" />
+          <EyeOff className="w-4 h-4 text-earth-500 shrink-0" aria-hidden="true" />
           <span>Masqué</span>
         </>
       )}
